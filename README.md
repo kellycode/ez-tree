@@ -1,3 +1,7 @@
+# Kellycode March 27, 2025  
+Removed vite, docker, node build requirements so it just runs without the extras  
+Will add a simple grunt build after code review  
+
 # EZ-Tree
 
 ![NPM Version](https://img.shields.io/npm/v/%40dgreenheck%2Fez-tree)
