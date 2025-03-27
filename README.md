@@ -1,6 +1,6 @@
 # Kellycode March 27, 2025  
 Removed vite, docker, node build requirements so it just runs without the extras  
-Will add a simple grunt build after code review  
+Will add loading progress screen and simple grunt build after code review  
 
 # EZ-Tree
 
