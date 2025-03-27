@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { Tree, TreePreset } from '@dgreenheck/ez-tree';
-import { Environment } from './environment';
+import { OrbitControls } from 'three/examples/controls/OrbitControls.js';
+import { Tree, TreePreset } from 'ez-tree';
+import { Environment } from './environment.js';
 
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
@@ -16,7 +16,7 @@ function paintUI() {
  * @param {THREE.WebGLRenderer} renderer 
  * @returns 
  */
-export async function createScene(renderer) {
+export function createScene(renderer) {
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x94b9f8, 0.0015);
 
@@ -79,7 +79,7 @@ export async function createScene(renderer) {
     forest.add(t);
   }
 
-  async function loadTrees(i) {
+  function loadTrees(i) {
     while (i < treeCount) {
       createTree();
 
@@ -90,19 +90,18 @@ export async function createScene(renderer) {
       progressElement.innerText = `LOADING... ${progress}%`;
 
       // Wait for the next animation frame to continue
-      await paintUI();
+      paintUI();
 
       i++;
     }
 
     // All trees are loaded, hide loading screen
-    await sleep(300);
     logoElement.style.clipPath = `inset(0% 0% 0% 0%)`;
     document.getElementById('loading-screen').style.display = 'none';
   }
 
   // Start the tree loading process
-  await loadTrees(0);
+  loadTrees(0);
 
   scene.add(forest);
 

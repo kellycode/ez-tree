@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/jsm/Addons.js';
-import { simplex2d } from './noise';
+import { GLTFLoader } from 'three/examples/loaders/GLTFLoader.js';
+import { simplex2d } from './noise.js';
 
 let loaded = false;
 let _grassMesh = null;
@@ -97,10 +97,10 @@ export class Grass extends THREE.Object3D {
 
     const gltfLoader = new GLTFLoader();
 
-    _grassMesh = (await gltfLoader.loadAsync('grass.glb')).scene.children[0];
-    _whiteFlower = (await gltfLoader.loadAsync('flower_white.glb')).scene.children[0];
-    _blueFlower = (await gltfLoader.loadAsync('flower_blue.glb')).scene.children[0];
-    _yellowFlower = (await gltfLoader.loadAsync('flower_yellow.glb')).scene.children[0];
+    _grassMesh = (await gltfLoader.loadAsync('public/grass.glb')).scene.children[0];
+    _whiteFlower = (await gltfLoader.loadAsync('public/flower_white.glb')).scene.children[0];
+    _blueFlower = (await gltfLoader.loadAsync('public/flower_blue.glb')).scene.children[0];
+    _yellowFlower = (await gltfLoader.loadAsync('public/flower_yellow.glb')).scene.children[0];
 
     // The flower is composed of multiple meshes with different materials. Append the
     // wind shader code to each material

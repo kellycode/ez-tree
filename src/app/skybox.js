@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { degToRad } from 'three/src/math/MathUtils.js';
-import fragmentShader from './shaders/skybox.frag?raw';
-import vertexShader from './shaders/skybox.vert?raw';
+// import * as fragmentShader from './shaders/skybox.frag?raw';
+// import * as vertexShader from './shaders/skybox.vert?raw';
 
 export class SkyboxOptions {
   constructor() {
@@ -42,8 +42,8 @@ export class SkyboxOptions {
  */
 export class Skybox extends THREE.Mesh {
   /**
-   * 
-   * @param {SkyboxOptions} options 
+   *
+   * @param {SkyboxOptions} options
    */
   constructor(options = new SkyboxOptions()) {
     super();
@@ -63,9 +63,9 @@ export class Skybox extends THREE.Mesh {
         uSunColor: { value: options.sunColor },
         uSkyColorLow: { value: options.skyColorLow },
         uSkyColorHigh: { value: options.skyColorHigh },
-        uSunSize: { value: options.sunSize }
+        uSunSize: { value: options.sunSize },
       },
-      side: THREE.BackSide
+      side: THREE.BackSide,
     });
 
     this.sun = new THREE.DirectionalLight();
@@ -95,7 +95,7 @@ export class Skybox extends THREE.Mesh {
     this.sun.position.set(
       100 * Math.cos(el) * Math.sin(az),
       100 * Math.sin(el),
-      100 * Math.cos(el) * Math.cos(az)
+      100 * Math.cos(el) * Math.cos(az),
     );
   }
 
@@ -147,8 +147,8 @@ export class Skybox extends THREE.Mesh {
   }
 
   /**
-    * @returns {THREE.Color}
-    */
+   * @returns {THREE.Color}
+   */
   get skyColorHigh() {
     return this.material.uniforms.uSkyColorHigh.value;
   }

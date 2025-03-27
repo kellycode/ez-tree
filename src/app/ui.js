@@ -1,10 +1,9 @@
 import * as THREE from 'three';
-import { GLTFExporter } from 'three/addons/exporters/GLTFExporter.js';
+import { GLTFExporter } from 'three/examples/exporters/GLTFExporter.js';
 import { Pane } from 'tweakpane';
-import { BarkType, Billboard, LeafType, TreePreset, Tree, TreeType } from '@dgreenheck/ez-tree';
-import { Environment } from './environment';
-import { OrbitControls } from 'three/examples/jsm/Addons.js';
-import { version } from '../../package.json';
+import { BarkType, Billboard, LeafType, TreePreset, Tree, TreeType } from 'ez-tree';
+import { Environment } from './environment.js';
+import { OrbitControls } from 'three/examples/controls/OrbitControls.js';
 
 const exporter = new GLTFExporter();
 let pane = null;
@@ -182,7 +181,7 @@ export function setupUI(tree, environment, renderer, scene, camera, controls, in
     view: 'text',
     label: 'version',
     parse: (v) => String(v),
-    value: version,
+    value: '1.0.0',
   });
 
   /** Export **/
