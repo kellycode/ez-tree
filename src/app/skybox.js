@@ -45,8 +45,12 @@ export class Skybox extends THREE.Mesh {
    *
    * @param {SkyboxOptions} options
    */
-  constructor(options = new SkyboxOptions()) {
+  constructor(shaders) {
     super();
+
+    let options = new SkyboxOptions();
+    let vertexShader = shaders['./shaders/skybox.vert'];
+    let fragmentShader = shaders['./shaders/skybox.frag'];
 
     this.name = 'Skybox';
 

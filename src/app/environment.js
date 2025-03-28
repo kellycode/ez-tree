@@ -6,8 +6,10 @@ import { Rocks } from './rocks.js';
 import { Clouds } from './clouds.js';
 
 export class Environment extends THREE.Object3D {
-  constructor() {
+  constructor(preloads) {
     super();
+
+    this.preloads = preloads;
 
     this.ground = new Ground();
     this.add(this.ground);
@@ -15,7 +17,7 @@ export class Environment extends THREE.Object3D {
     this.grass = new Grass();
     this.add(this.grass);
 
-    this.skybox = new Skybox();
+    this.skybox = new Skybox(preloads.shaders);
     this.add(this.skybox);
 
     this.rocks = new Rocks();

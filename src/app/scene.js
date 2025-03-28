@@ -16,11 +16,11 @@ function paintUI() {
  * @param {THREE.WebGLRenderer} renderer 
  * @returns 
  */
-export function createScene(renderer) {
+export function createScene(renderer, preloads) {
   const scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x94b9f8, 0.0015);
 
-  const environment = new Environment();
+  const environment = new Environment(preloads);
   scene.add(environment);
 
   const camera = new THREE.PerspectiveCamera(

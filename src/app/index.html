@@ -58,7 +58,6 @@
         </div>
 
         <div id="root">
-          
             <img id="about-icon" class="about-icon" src="./public/icon_about.png" onclick="showAbout()" />
             <img id="audio-status" class="audio-icon" src="./public/icon_playing.png" onclick="toggleAudio()" />
             <div id="app"></div>
@@ -113,14 +112,47 @@
         </audio>
 
         <script type="module">
-            import { Preload } from "./preload.js";
-            import { MainTree } from "./main.js";
+            let preloads = {};
 
-            let init = function () {
-                MainTree.init();
+            let textureURLArray = [
+                "./public/grass.jpg",
+                "./public/dirt_color.jpg",
+                "./public/dirt_normal.jpg",
+            ]
+
+            let gltfURLArray = [
+                "./public/grass.glb",
+                "./public/flower_white.glb",
+                "./public/flower_blue.glb",
+                "./public/flower_yellow.glb",
+            ];
+
+            let shaderURLArray = ["./shaders/skybox.vert", "./shaders/skybox.frag"];
+
+            import { Preloader } from "./preloader.js";
+            import { MainEZTree } from "./main.js";
+
+            let init = function (preloadName, preloadObject) {
+                if (preloadName === "shaders") {
+                    preloads.shaders = preloadObject;
+                }
+
+                if (preloadName === "textures") {
+                    preloads.textures = preloadObject;
+                }
+
+                if (preloadName === "gltf") {
+                    preloads.gltf = preloadObject;
+                }
+
+                if(preloads.textures && preloads.shaders && preloads.gltf) {
+                    MainEZTree.init(preloads);
+                }
             };
 
-            Preload.installShaders(init);
+            Preloader.preloadShaders(shaderURLArray, init);
+            Preloader.preloadTextures(textureURLArray, init);
+            Preloader.preloadGLTF(gltfURLArray, init);
         </script>
 
         <script>

@@ -6,8 +6,10 @@ import { OutputPass } from 'three/examples/postprocessing/OutputPass.js';
 import { setupUI } from './ui.js';
 import { createScene } from './scene.js';
 
-export class MainTree {
-  static init() {
+export class MainEZTree {
+  static init(preloads) {
+
+    this.preloads = preloads;
     const container = document.getElementById('app');
 
     // User needs to interact with the page before audio will play
@@ -24,7 +26,7 @@ export class MainTree {
     container.appendChild(renderer.domElement);
 
     //const sceneElements = createScene(renderer);
-    const { scene, environment, tree, camera, controls } = createScene(renderer);
+    const { scene, environment, tree, camera, controls } = createScene(renderer, preloads);
 
     // the only thing I can see changed with
     // the EffectComposer items is more fog
