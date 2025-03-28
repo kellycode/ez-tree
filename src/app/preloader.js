@@ -1,9 +1,8 @@
-import * as THREE from 'three';
+import * as THREE from "three";
 import { GLTFLoader } from "three/examples/loaders/GLTFLoader.js";
+import { DRACOLoader } from 'three/examples/loaders/DRACOLoader.js';
 
 export class Preloader {
-    
-
     // pass an array of texture paths and an object
     // is returned with the path as key to the texture value
     // this will replace the load blocking awaits for
@@ -18,7 +17,7 @@ export class Preloader {
         function checkAllLoaded() {
             loadedCount++;
             if (loadedCount === textureUrlArray.length && !hasError) {
-                callback('textures', loadedTextures);
+                callback("textures", loadedTextures);
             }
         }
 
@@ -42,6 +41,11 @@ export class Preloader {
 
     static preloadGLTF(gltfUrlArray, callback) {
         const gltfLoader = new GLTFLoader();
+        const dracoLoader = new DRACOLoader();
+        const decoderPath = "./draco/";
+        dracoLoader.setDecoderPath(decoderPath);
+        gltfLoader.setDRACOLoader(dracoLoader);
+
         let loadedCount = 0;
         let loadedGLTF = {};
         let hasError = false;
@@ -50,7 +54,7 @@ export class Preloader {
             loadedCount++;
             if (loadedCount === gltfUrlArray.length && !hasError) {
                 if (callback) {
-                    callback('gltf', loadedGLTF);
+                    callback("gltf", loadedGLTF);
                 } else {
                     return loadedGLTF;
                 }
@@ -102,8 +106,8 @@ export class Preloader {
                     checkAllLoaded(url, this);
                 } else {
                     hasError = true;
-                    console.log("There was a shader load problem:")
-                    console.log('...status;' + xhttp.status + ' : ' + xhttp.statusText);
+                    console.log("There was a shader load problem:");
+                    console.log("...status;" + xhttp.status + " : " + xhttp.statusText);
                 }
             };
             xhttp.open("GET", url);

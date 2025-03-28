@@ -11,16 +11,16 @@ export class Environment extends THREE.Object3D {
 
     this.preloads = preloads;
 
-    this.ground = new Ground();
+    this.ground = new Ground(preloads);
     this.add(this.ground);
 
-    this.grass = new Grass();
+    this.grass = new Grass(preloads);
     this.add(this.grass);
 
-    this.skybox = new Skybox(preloads.shaders);
+    this.skybox = new Skybox(preloads);
     this.add(this.skybox);
 
-    this.rocks = new Rocks();
+    this.rocks = new Rocks(preloads);
     this.add(this.rocks);
 
     this.clouds = new Clouds();

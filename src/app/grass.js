@@ -1,6 +1,6 @@
-import * as THREE from 'three';
-import { GLTFLoader } from 'three/examples/loaders/GLTFLoader.js';
-import { simplex2d } from './noise.js';
+import * as THREE from "three";
+import { GLTFLoader } from "three/examples/loaders/GLTFLoader.js";
+import { simplex2d } from "./noise.js";
 
 let loaded = false;
 let _grassMesh = null;
@@ -9,268 +9,233 @@ let _whiteFlower = null;
 let _yellowFlower = null;
 
 export class GrassOptions {
-  /**
-   * Number of grass instances
-   */
-  instanceCount = 5000;
+    /**
+     * Number of grass instances
+     */
+    instanceCount = 5000;
 
-  /**
-   * Maximum number of grass instances
-   */
-  maxInstanceCount = 25000;
+    /**
+     * Maximum number of grass instances
+     */
+    maxInstanceCount = 25000;
 
-  /**
-   * Number of flowers to generate (per color)
-   */
-  flowerCount = 50;
+    /**
+     * Number of flowers to generate (per color)
+     */
+    flowerCount = 50;
 
-  /**
-   * Size of the grass patches
-   */
-  scale = 100;
+    /**
+     * Size of the grass patches
+     */
+    scale = 100;
 
-  /**
-   * Patchiness of the grass
-   */
-  patchiness = 0.7;
+    /**
+     * Patchiness of the grass
+     */
+    patchiness = 0.7;
 
-  /**
-   * Scale factor for the grass model
-   */
-  size = { x: 5, y: 4, z: 5 };
+    /**
+     * Scale factor for the grass model
+     */
+    size = { x: 5, y: 4, z: 5 };
 
-  /**
-   * Maximum variation in the grass size
-   */
-  sizeVariation = { x: 1, y: 2, z: 1 };
+    /**
+     * Maximum variation in the grass size
+     */
+    sizeVariation = { x: 1, y: 2, z: 1 };
 
-  /**
-   * Strength of wind along each axis
-   */
-  windStrength = { x: 0.3, y: 0, z: 0.3 };
+    /**
+     * Strength of wind along each axis
+     */
+    windStrength = { x: 0.3, y: 0, z: 0.3 };
 
-  /**
-   * Oscillation frequency for wind movement
-   */
-  windFrequency = 1.0;
+    /**
+     * Oscillation frequency for wind movement
+     */
+    windFrequency = 1.0;
 
-  /**
-   * Controls how localized wind effects are
-   */
-  windScale = 400.0;
+    /**
+     * Controls how localized wind effects are
+     */
+    windScale = 400.0;
 }
 
 export class Grass extends THREE.Object3D {
-  constructor(options = new GrassOptions()) {
-    super();
+    constructor(preloads) {
+        super();
+
+        /**
+         * @type {GrassOptions}
+         */
+        this.options = new GrassOptions();
+
+        this.flowers = new THREE.Group();
+        this.add(this.flowers);
+
+        _grassMesh = preloads.gltf["./public/grass.glb"].scene.children[0];
+        _whiteFlower = preloads.gltf["./public/flower_white.glb"].scene.children[0];
+        _blueFlower = preloads.gltf["./public/flower_blue.glb"].scene.children[0];
+        _yellowFlower = preloads.gltf["./public/flower_yellow.glb"].scene.children[0];
+
+        [_whiteFlower, _blueFlower, _yellowFlower].forEach((mesh) => {
+            mesh.traverse((o) => {
+                if (o.isMesh && o.material) {
+                    if (o.material.map) {
+                        o.material = new THREE.MeshPhongMaterial({ map: o.material.map });
+                    }
+                    this.appendWindShader(o.material);
+                }
+            });
+        });
+
+        this.generateGrass();
+        this.generateFlowers(_whiteFlower);
+        this.generateFlowers(_blueFlower);
+        this.generateFlowers(_yellowFlower);
+    }
+
+    get instanceCount() {
+        return this.grassMesh?.count ?? this.options.instanceCount;
+    }
+
+    set instanceCount(value) {
+        this.grassMesh.count = value;
+    }
+
+    update(elapsedTime) {
+        this.traverse((o) => {
+            if (o.isMesh && o.material?.userData.shader) {
+                o.material.userData.shader.uniforms.uTime.value = elapsedTime;
+            }
+        });
+    }
+
+    generateGrass() {
+        const grassMaterial = new THREE.MeshPhongMaterial({
+            map: _grassMesh.material.map,
+            // Add some emission so grass has some color when not lit
+            emissive: new THREE.Color(0x308040),
+            emissiveIntensity: 0.05,
+            transparent: false,
+            alphaTest: 0.5,
+            depthTest: true,
+            depthWrite: true,
+            side: THREE.DoubleSide,
+        });
+
+        this.appendWindShader(grassMaterial, true);
+
+        // Decrease grass brightness
+        grassMaterial.color.multiplyScalar(0.6);
+
+        this.grassMesh = new THREE.InstancedMesh(_grassMesh.geometry, grassMaterial, this.options.maxInstanceCount);
+
+        this.generateGrassInstances();
+
+        this.add(this.grassMesh);
+    }
+
+    generateGrassInstances() {
+        const dummy = new THREE.Object3D();
+
+        let count = 0;
+        for (let i = 0; i < this.options.maxInstanceCount; i++) {
+            const r = 10 + Math.random() * 500;
+            const theta = Math.random() * 2.0 * Math.PI;
+
+            // Set position randomly
+            const p = new THREE.Vector3(r * Math.cos(theta), 0, r * Math.sin(theta));
+
+            const n = 0.5 + 0.5 * simplex2d(new THREE.Vector2(p.x / this.options.scale, p.z / this.options.scale));
+
+            if (n > this.options.patchiness && Math.random() + 0.6 > this.options.patchiness) {
+                continue;
+            }
+
+            dummy.position.copy(p);
+
+            // Set rotation randomly
+            dummy.rotation.set(0, 2 * Math.PI * Math.random(), 0);
+
+            // Set scale randomly
+            dummy.scale.set(
+                this.options.sizeVariation.x * Math.random() + this.options.size.x,
+                this.options.sizeVariation.y * Math.random() + this.options.size.y,
+                this.options.sizeVariation.z * Math.random() + this.options.size.z
+            );
+
+            // Apply the transformation to the instance
+            dummy.updateMatrix();
+
+            const color = new THREE.Color(0.25 + Math.random() * 0.1, 0.3 + Math.random() * 0.3, 0.1);
+
+            this.grassMesh.setMatrixAt(count, dummy.matrix);
+            this.grassMesh.setColorAt(count, color);
+            count++;
+        }
+
+        // Set count to only show up to `instanceCount` instances
+        this.grassMesh.count = this.options.instanceCount;
+
+        this.grassMesh.receiveShadow = true;
+        this.grassMesh.castShadow = true;
+
+        // Ensure the transformation is updated in the GPU
+        this.grassMesh.instanceMatrix.needsUpdate = true;
+        this.grassMesh.instanceColor.needsUpdate = true;
+    }
 
     /**
-     * @type {GrassOptions}
+     *
+     * @param {THREE.Mesh} flowerMesh
      */
-    this.options = options;
+    generateFlowers(flowerMesh) {
+        for (let i = 0; i < this.options.flowerCount; i++) {
+            const r = 10 + Math.random() * 200;
+            const theta = Math.random() * 2.0 * Math.PI;
 
-    this.flowers = new THREE.Group();
-    this.add(this.flowers);
+            // Set position randomly
+            const p = new THREE.Vector3(r * Math.cos(theta), 0, r * Math.sin(theta));
 
-    this.fetchAssets().then(() => {
-      this.generateGrass();
-      this.generateFlowers(_whiteFlower);
-      this.generateFlowers(_blueFlower);
-      this.generateFlowers(_yellowFlower);
-    });
-  }
+            const n = 0.5 + 0.5 * simplex2d(new THREE.Vector2(p.x / this.options.scale, p.z / this.options.scale));
 
-  get instanceCount() {
-    return this.grassMesh?.count ?? this.options.instanceCount;
-  }
+            if (n > this.options.patchiness && Math.random() + 0.8 > this.options.patchiness) {
+                continue;
+            }
 
-  set instanceCount(value) {
-    this.grassMesh.count = value;
-  }
+            const flower = flowerMesh.clone();
+            flower.position.copy(p);
+            flower.rotation.set(0, 2 * Math.PI * Math.random(), 0);
+            const scale = 0.02 + 0.03 * Math.random();
+            flower.scale.set(scale, scale, scale);
 
-  /**
-   * 
-   * @returns {Promise<THREE.Geometry>}
-   */
-  async fetchAssets() {
-    if (loaded) return;
-
-    const gltfLoader = new GLTFLoader();
-
-    _grassMesh = (await gltfLoader.loadAsync('public/grass.glb')).scene.children[0];
-    _whiteFlower = (await gltfLoader.loadAsync('public/flower_white.glb')).scene.children[0];
-    _blueFlower = (await gltfLoader.loadAsync('public/flower_blue.glb')).scene.children[0];
-    _yellowFlower = (await gltfLoader.loadAsync('public/flower_yellow.glb')).scene.children[0];
-
-    // The flower is composed of multiple meshes with different materials. Append the
-    // wind shader code to each material
-    [_whiteFlower, _blueFlower, _yellowFlower].forEach((mesh) => {
-      mesh.traverse((o) => {
-        if (o.isMesh && o.material) {
-          if (o.material.map) {
-            o.material = new THREE.MeshPhongMaterial({ map: o.material.map });
-          }
-          this.appendWindShader(o.material);
+            this.flowers.add(flower);
         }
-      });
-    });
-
-    loaded = true;
-  }
-
-  update(elapsedTime) {
-    this.traverse((o) => {
-      if (o.isMesh && o.material?.userData.shader) {
-        o.material.userData.shader.uniforms.uTime.value = elapsedTime;
-      }
-    });
-  }
-
-  generateGrass() {
-    const grassMaterial = new THREE.MeshPhongMaterial({
-      map: _grassMesh.material.map,
-      // Add some emission so grass has some color when not lit
-      emissive: new THREE.Color(0x308040),
-      emissiveIntensity: 0.05,
-      transparent: false,
-      alphaTest: 0.5,
-      depthTest: true,
-      depthWrite: true,
-      side: THREE.DoubleSide
-    });
-
-    this.appendWindShader(grassMaterial, true);
-
-    // Decrease grass brightness
-    grassMaterial.color.multiplyScalar(0.6);
-
-    this.grassMesh = new THREE.InstancedMesh(
-      _grassMesh.geometry,
-      grassMaterial,
-      this.options.maxInstanceCount);
-
-    this.generateGrassInstances();
-
-    this.add(this.grassMesh);
-  }
-
-  generateGrassInstances() {
-    const dummy = new THREE.Object3D();
-
-    let count = 0;
-    for (let i = 0; i < this.options.maxInstanceCount; i++) {
-      const r = 10 + Math.random() * 500;
-      const theta = Math.random() * 2.0 * Math.PI;
-
-      // Set position randomly
-      const p = new THREE.Vector3(
-        r * Math.cos(theta),
-        0,
-        r * Math.sin(theta)
-      );
-
-      const n = 0.5 + 0.5 * simplex2d(new THREE.Vector2(
-        p.x / this.options.scale,
-        p.z / this.options.scale
-      ));
-
-      if (n > this.options.patchiness && Math.random() + 0.6 > this.options.patchiness) { continue; }
-
-      dummy.position.copy(p);
-
-      // Set rotation randomly
-      dummy.rotation.set(
-        0,
-        2 * Math.PI * Math.random(),
-        0
-      );
-
-      // Set scale randomly
-      dummy.scale.set(
-        this.options.sizeVariation.x * Math.random() + this.options.size.x,
-        this.options.sizeVariation.y * Math.random() + this.options.size.y,
-        this.options.sizeVariation.z * Math.random() + this.options.size.z
-      );
-
-      // Apply the transformation to the instance
-      dummy.updateMatrix();
-
-      const color = new THREE.Color(
-        0.25 + Math.random() * 0.1,
-        0.3 + Math.random() * 0.3,
-        0.1);
-
-      this.grassMesh.setMatrixAt(count, dummy.matrix);
-      this.grassMesh.setColorAt(count, color);
-      count++;
     }
 
-    // Set count to only show up to `instanceCount` instances
-    this.grassMesh.count = this.options.instanceCount;
+    /**
+     *
+     * @param {THREE.Material} material
+     */
+    appendWindShader(material, instanced = false) {
+        material.onBeforeCompile = (shader) => {
+            shader.uniforms.uTime = { value: 0 };
+            shader.uniforms.uWindStrength = { value: this.options.windStrength };
+            shader.uniforms.uWindFrequency = { value: this.options.windFrequency };
+            shader.uniforms.uWindScale = { value: this.options.windScale };
 
-    this.grassMesh.receiveShadow = true;
-    this.grassMesh.castShadow = true;
-
-    // Ensure the transformation is updated in the GPU
-    this.grassMesh.instanceMatrix.needsUpdate = true;
-    this.grassMesh.instanceColor.needsUpdate = true;
-  }
-
-  /**
-   * 
-   * @param {THREE.Mesh} flowerMesh 
-   */
-  generateFlowers(flowerMesh) {
-    for (let i = 0; i < this.options.flowerCount; i++) {
-      const r = 10 + Math.random() * 200;
-      const theta = Math.random() * 2.0 * Math.PI;
-
-      // Set position randomly
-      const p = new THREE.Vector3(
-        r * Math.cos(theta),
-        0,
-        r * Math.sin(theta)
-      );
-
-      const n = 0.5 + 0.5 * simplex2d(new THREE.Vector2(
-        p.x / this.options.scale,
-        p.z / this.options.scale
-      ));
-
-      if (n > this.options.patchiness && Math.random() + 0.8 > this.options.patchiness) { continue; }
-
-      const flower = flowerMesh.clone();
-      flower.position.copy(p);
-      flower.rotation.set(0, 2 * Math.PI * Math.random(), 0);
-      const scale = 0.02 + 0.03 * Math.random();
-      flower.scale.set(scale, scale, scale);
-
-      this.flowers.add(flower);
-    }
-  }
-
-  /**
-   * 
-   * @param {THREE.Material} material 
-   */
-  appendWindShader(material, instanced = false) {
-    material.onBeforeCompile = (shader) => {
-      shader.uniforms.uTime = { value: 0 };
-      shader.uniforms.uWindStrength = { value: this.options.windStrength };
-      shader.uniforms.uWindFrequency = { value: this.options.windFrequency };
-      shader.uniforms.uWindScale = { value: this.options.windScale };
-
-      shader.vertexShader = `
+            shader.vertexShader =
+                `
       uniform float uTime;
       uniform vec3 uWindStrength;
       uniform float uWindFrequency;
       uniform float uWindScale;
       ` + shader.vertexShader;
 
-      // Add code for simplex noise
-      shader.vertexShader = shader.vertexShader.replace(
-        `void main() {`,
-        `
+            // Add code for simplex noise
+            shader.vertexShader = shader.vertexShader.replace(
+                `void main() {`,
+                `
         vec3 mod289(vec3 x) {
           return x - floor(x * (1.0 / 289.0)) * 289.0;
         }
@@ -312,12 +277,12 @@ export class Grass extends THREE.Object3D {
           return 130.0 * dot(m, g);
         }
         
-        void main() {`,
-      );
+        void main() {`
+            );
 
-      // To make code reusable for grass and flowers, conditionally multiply by instanceMatrix
-      let vertexShader = instanced ?
-        `
+            // To make code reusable for grass and flowers, conditionally multiply by instanceMatrix
+            let vertexShader = instanced
+                ? `
         vec4 mvPosition = instanceMatrix * vec4(transformed, 1.0);
         float windOffset = 2.0 * 3.14 * simplex2d((modelMatrix * mvPosition).xz / uWindScale);
         vec3 windSway = position.y * uWindStrength * 
@@ -328,8 +293,8 @@ export class Grass extends THREE.Object3D {
         mvPosition = modelViewMatrix * mvPosition;
 
         gl_Position = projectionMatrix * mvPosition;
-        ` :
         `
+                : `
         vec4 mvPosition = vec4(transformed, 1.0);
         float windOffset = 2.0 * 3.14 * simplex2d((modelMatrix * mvPosition).xz / uWindScale);
         vec3 windSway = 0.2 * position.y * uWindStrength * 
@@ -342,14 +307,11 @@ export class Grass extends THREE.Object3D {
         gl_Position = projectionMatrix * mvPosition;
         `;
 
-      // worldPosition = modelMatrix * instanceMatrix * position;
-      // worldWindDirection = model
-      shader.vertexShader = shader.vertexShader.replace(
-        `#include <project_vertex>`,
-        vertexShader
-      );
+            // worldPosition = modelMatrix * instanceMatrix * position;
+            // worldWindDirection = model
+            shader.vertexShader = shader.vertexShader.replace(`#include <project_vertex>`, vertexShader);
 
-      material.userData.shader = shader;
-    };
-  }
+            material.userData.shader = shader;
+        };
+    }
 }

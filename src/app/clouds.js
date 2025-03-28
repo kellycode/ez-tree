@@ -84,6 +84,7 @@ export class Clouds extends THREE.Mesh {
   }
 
   update(elapsedTime) {
+    this.rotation.z += 0.001;
     const shader = this.material.userData.shader;
     if (shader) {
       shader.uniforms.uTime.value = elapsedTime;

@@ -52,12 +52,13 @@
     </head>
 
     <body>
+        <!-- <div id="testDiv" style="color: white;position: absolute; font-size: 36px; left: 100px; top: 100px; z-index: 100000;">HELLO</div> -->
         <div id="loading-screen">
             <img id="logo" src="./public/logo.png" />
             <div id="loading-text">LOADING... 0%</div>
         </div>
 
-        <div id="root">
+        <div id="root"> 
             <img id="about-icon" class="about-icon" src="./public/icon_about.png" onclick="showAbout()" />
             <img id="audio-status" class="audio-icon" src="./public/icon_playing.png" onclick="toggleAudio()" />
             <div id="app"></div>
@@ -125,6 +126,9 @@
                 "./public/flower_white.glb",
                 "./public/flower_blue.glb",
                 "./public/flower_yellow.glb",
+                "./public/rock1.glb",
+                "./public/rock2.glb",
+                "./public/rock3.glb"
             ];
 
             let shaderURLArray = ["./shaders/skybox.vert", "./shaders/skybox.frag"];
