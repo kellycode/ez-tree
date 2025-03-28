@@ -54,7 +54,8 @@ export class Preload {
     // pass an array of texture paths and an object
     // is returned with the path as key to the texture value
     // this will replace the load blocking awaits for
-    // texture loading - not implemented yet
+    // texture loading - await is convenient but disrupts
+    // program flow - convenient but wanky
     static textureLoad(textureUrlArray, callback) {
         const textureLoader = new THREE.TextureLoader();
         let loadedCount = 0;
