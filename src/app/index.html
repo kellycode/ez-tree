@@ -1,209 +1,136 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png" />
-    <link rel="icon" type="image/png" sizes="32x32" href="./public//favicon-32x32.png" />
-    <link rel="icon" type="image/png" sizes="16x16" href="./public//favicon-16x16.png" />
-    <!-- <link rel="manifest" href="/site.webmanifest"> -->
-    <title>EZ-Tree | Procedural Tree Generator</title>
-    <meta
-      name="description"
-      content="EZ-Tree is a procedural tree generator that allows you to create realistic 3D tree models with ease."
-    />
-    <!-- SEO Meta Tags -->
-    <meta
-      name="keywords"
-      content="tree generator, 3D trees, procedural generation, 3D modeling, game development, web3D, threejs"
-    />
-    <meta name="author" content="Dan Greenheck" />
-    <meta property="og:title" content="EZ-Tree | Procedural Tree Generator" />
-    <meta
-      property="og:description"
-      content="EZ-Tree is a procedural tree generator that allows you to create realistic 3D tree models with ease."
-    />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://eztree.dev" />
-    <meta property="og:image" content="https://eztree.dev/og-image.png" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:creator" content="@dangreenheck" />
-    <meta name="twitter:title" content="EZ-Tree | Procedural Tree Generator" />
-    <meta
-      name="twitter:description"
-      content="EZ-Tree is a procedural tree generator that allows you to create realistic 3D models of trees with ease."
-    />
-    <meta name="twitter:image" content="https://eztree.dev/og-image.png" />
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png" />
+        <link rel="icon" type="image/png" sizes="32x32" href="./public//favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="./public//favicon-16x16.png" />
+        <!-- <link rel="manifest" href="/site.webmanifest"> -->
+        <title>EZ-Tree | Procedural Tree Generator</title>
+        <meta
+            name="description"
+            content="EZ-Tree is a procedural tree generator that allows you to create realistic 3D tree models with ease."
+        />
+        <!-- SEO Meta Tags -->
+        <meta
+            name="keywords"
+            content="tree generator, 3D trees, procedural generation, 3D modeling, game development, web3D, threejs"
+        />
+        <meta name="author" content="Dan Greenheck" />
+        <meta property="og:title" content="EZ-Tree | Procedural Tree Generator" />
+        <meta
+            property="og:description"
+            content="EZ-Tree is a procedural tree generator that allows you to create realistic 3D tree models with ease."
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://eztree.dev" />
+        <meta property="og:image" content="https://eztree.dev/og-image.png" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:creator" content="@dangreenheck" />
+        <meta name="twitter:title" content="EZ-Tree | Procedural Tree Generator" />
+        <meta
+            name="twitter:description"
+            content="EZ-Tree is a procedural tree generator that allows you to create realistic 3D models of trees with ease."
+        />
+        <meta name="twitter:image" content="https://eztree.dev/og-image.png" />
 
-    <link rel="stylesheet" href="./public/styles.css" />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
-    />
+        <link rel="stylesheet" href="./public/styles.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
 
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "https://cdn.jsdelivr.net/npm/three@0.173.0/build/three.module.js",
-          "three/examples/": "https://cdn.jsdelivr.net/npm/three@0.173.0/examples/jsm/",
-          "three/src/": "https://cdn.jsdelivr.net/npm/three@0.173.0/src/",
-          "tweakpane": "https://cdn.jsdelivr.net/npm/tweakpane@4.0.5/dist/tweakpane.min.js",
-          "ez-tree": "https://cdn.jsdelivr.net/npm/@dgreenheck/ez-tree@1.0.0/build/ez-tree.es.js"
-        }
-      }
-    </script>
+        <script type="importmap">
+            {
+                "imports": {
+                    "three": "https://cdn.jsdelivr.net/npm/three@0.173.0/build/three.module.js",
+                    "three/examples/": "https://cdn.jsdelivr.net/npm/three@0.173.0/examples/jsm/",
+                    "three/src/": "https://cdn.jsdelivr.net/npm/three@0.173.0/src/",
+                    "tweakpane": "https://cdn.jsdelivr.net/npm/tweakpane@4.0.5/dist/tweakpane.min.js",
+                    "ez-tree": "https://cdn.jsdelivr.net/npm/@dgreenheck/ez-tree@1.0.0/build/ez-tree.es.js"
+                }
+            }
+        </script>
+    </head>
 
-    <script>
-      var installShaders = function (callback) {
-        var vertexShader = null;
-        var fragmentShader = null;
-
-        function shadersDone() {
-          if(vertexShader && fragmentShader) {
-            window.vertexShader = vertexShader;
-            window.fragmentShader = fragmentShader;
-            console.log('shaders in');
-            callback();
-          }
-
-        }
-
-        function vertexDone(code) {
-          vertexShader = code;
-          if (fragmentShader !== null) {
-            shadersDone();
-          }
-        }
-
-        function fragmentDone(code) {
-          fragmentShader = code;
-          if (vertexShader !== null) {
-            shadersDone();
-          }
-        }
-
-        var xhr1 = new XMLHttpRequest();
-        var xhr2 = new XMLHttpRequest();
-
-        // C:\Users\kwkel\Desktop\Projects\THREE.Terrain\shaders\terrain.frag.glsl
-        xhr1.open('GET', './shaders/skybox.vert', true);
-        xhr2.open('GET', './shaders/skybox.frag', true);
-
-        xhr1.responseType = 'text';
-        xhr2.responseType = 'text';
-
-        xhr1.onload = function () {
-          if (xhr1.readyState === xhr1.DONE && xhr1.status === 200) {
-            vertexDone(xhr1.responseText);
-          }
-        };
-
-        xhr2.onload = function () {
-          if (xhr2.readyState === xhr2.DONE && xhr2.status === 200) {
-            fragmentDone(xhr2.responseText);
-          }
-        };
-
-        xhr1.send(null);
-        xhr2.send(null);
-      };
-    </script>
-  </head>
-
-  <body>
-    <div id="loading-screen">
-      <img id="logo" src="./public/logo.png" />
-      <div id="loading-text">LOADING... 0%</div>
-    </div>
-
-    <div id="root">
-      <img
-        id="about-icon"
-        class="about-icon"
-        src="./public/icon_about.png"
-        onclick="showAbout()"
-      />
-      <img
-        id="audio-status"
-        class="audio-icon"
-        src="./public/icon_playing.png"
-        onclick="toggleAudio()"
-      />
-      <div id="app"></div>
-      <div id="ui-container"></div>
-
-      <div id="aboutOverlay" class="overlay">
-        <div class="about-dialog">
-          <img src="./public/logo.png" alt="App Icon" />
-          <h1>EZ-Tree</h1>
-          <h2>Procedural Tree Generator</h2>
-          <h3>Made by Dan Greenheck</h3>
-          <a href="https://www.dangreenheck.com">www.dangreenheck.com</a>
-          <div class="social-icons">
-            <a
-              href="mailto:dan.greenheck@drgsoftwaresolutions.com"
-              target="_blank"
-              class="social-icon email"
-              ><i class="fas fa-envelope"></i
-            ></a>
-            <a
-              href="https://github.com/dgreenheck"
-              target="_blank"
-              class="social-icon github"
-              ><i class="fab fa-github"></i
-            ></a>
-            <a
-              href="https://www.youtube.com/channel/UCrdx_EU_Wx8_uBfqO0cI-9Q"
-              target="_blank"
-              class="social-icon youtube"
-              ><i class="fab fa-youtube"></i
-            ></a>
-            <a
-              href="https://www.x.com/dangreenheck"
-              target="_blank"
-              class="social-icon twitter"
-              ><i class="fab fa-x"></i
-            ></a>
-            <a
-              href="https://www.linkedin.com/in/danielgreenheck/"
-              target="_blank"
-              class="social-icon linkedin"
-              ><i class="fab fa-linkedin"></i
-            ></a>
-          </div>
-          <button class="close-button" onclick="closeAbout()">CLOSE</button>
+    <body>
+        <div id="loading-screen">
+            <img id="logo" src="./public/logo.png" />
+            <div id="loading-text">LOADING... 0%</div>
         </div>
-      </div>
-    </div>
 
-    <a id="downloadLink" style="display: none"></a>
+        <div id="root">
+          
+            <img id="about-icon" class="about-icon" src="./public/icon_about.png" onclick="showAbout()" />
+            <img id="audio-status" class="audio-icon" src="./public/icon_playing.png" onclick="toggleAudio()" />
+            <div id="app"></div>
+            <div id="ui-container"></div>
 
-    <!-- Used for file uploads -->
-    <input type="file" id="fileInput" accept=".json" style="display: none" />
+            <div id="aboutOverlay" class="overlay">
+                <div class="about-dialog">
+                    <img src="./public/logo.png" alt="App Icon" />
+                    <h1>EZ-Tree</h1>
+                    <h2>Procedural Tree Generator</h2>
+                    <h3>Made by Dan Greenheck</h3>
+                    <a href="https://www.dangreenheck.com">www.dangreenheck.com</a>
+                    <div class="social-icons">
+                        <a
+                            href="mailto:dan.greenheck@drgsoftwaresolutions.com"
+                            target="_blank"
+                            class="social-icon email"
+                            ><i class="fas fa-envelope"></i
+                        ></a>
+                        <a href="https://github.com/dgreenheck" target="_blank" class="social-icon github"
+                            ><i class="fab fa-github"></i
+                        ></a>
+                        <a
+                            href="https://www.youtube.com/channel/UCrdx_EU_Wx8_uBfqO0cI-9Q"
+                            target="_blank"
+                            class="social-icon youtube"
+                            ><i class="fab fa-youtube"></i
+                        ></a>
+                        <a href="https://www.x.com/dangreenheck" target="_blank" class="social-icon twitter"
+                            ><i class="fab fa-x"></i
+                        ></a>
+                        <a
+                            href="https://www.linkedin.com/in/danielgreenheck/"
+                            target="_blank"
+                            class="social-icon linkedin"
+                            ><i class="fab fa-linkedin"></i
+                        ></a>
+                    </div>
+                    <button class="close-button" onclick="closeAbout()">CLOSE</button>
+                </div>
+            </div>
+        </div>
 
-    <audio id="background-audio" loop>
-      <source src="./public/ambience.mp3" type="audio/mpeg" />
-      Your browser does not support the audio element.
-    </audio>
+        <a id="downloadLink" style="display: none"></a>
 
-    <script type="module">
-      import { MainTree } from './main.js';
+        <!-- Used for file uploads -->
+        <input type="file" id="fileInput" accept=".json" style="display: none" />
 
-      let init = function() {
-        MainTree.init();
-      }
+        <audio id="background-audio" loop>
+            <source src="./public/ambience.mp3" type="audio/mpeg" />
+            Your browser does not support the audio element.
+        </audio>
 
-      installShaders(init);
-    </script>
+        <script type="module">
+            import { Preload } from "./preload.js";
+            import { MainTree } from "./main.js";
 
-    <script>
-      function showAbout() {
-        document.getElementById('aboutOverlay').classList.add('active');
-      }
+            let init = function () {
+                MainTree.init();
+            };
 
-      function closeAbout() {
-        document.getElementById('aboutOverlay').classList.remove('active');
-      }
-    </script>
-  </body>
+            Preload.installShaders(init);
+        </script>
+
+        <script>
+            function showAbout() {
+                document.getElementById("aboutOverlay").classList.add("active");
+            }
+
+            function closeAbout() {
+                document.getElementById("aboutOverlay").classList.remove("active");
+            }
+        </script>
+    </body>
 </html>

@@ -26,6 +26,8 @@ export class MainTree {
     //const sceneElements = createScene(renderer);
     const { scene, environment, tree, camera, controls } = createScene(renderer);
 
+    // the only thing I can see changed with
+    // the EffectComposer items is more fog
     const composer = new EffectComposer(renderer);
 
     composer.addPass(new RenderPass(scene, camera));
